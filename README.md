@@ -37,3 +37,25 @@ venv\Scripts\activate          # Windows
 pip install -r requirements.txt
 python-binance
 
+# Usage
+1.**Run the bot**
+
+python bot.py
+
+
+2.**Follow the CLI prompts:**
+
+Enter your API Key and API Secret
+
+Choose an action:
+
+1 → Place Market Order
+
+2 → Place Limit Order
+
+3 → Exit
+
+3.**Check logs**
+
+All activity is saved in logs/trading_bot.log
+
