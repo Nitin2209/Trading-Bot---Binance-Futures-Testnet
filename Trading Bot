@@ -1,0 +1,116 @@
+"""
+Simplified Trading Bot - Binance Futures Testnet
+"""
+
+import logging
+import os
+import sys
+from binance.client import Client
+from binance.enums import *
+
+#Logging Setup
+os.makedirs("logs", exist_ok=True)  # ensure logs folder exists
+
+logging.basicConfig(
+    filename="logs/trading_bot.log",
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
+
+class BasicBot:
+    def __init__(self, api_key, api_secret):
+        # Initialize Binance Futures Testnet client
+        self.client = Client(api_key, api_secret)
+        self.client.API_URL = "https://testnet.binancefuture.com/fapi"  # Futures Testnet base URL
+        logging.info("Bot initialized with Testnet API")
+
+    def place_market_order(self, symbol, side, quantity):
+        try:
+            order = self.client.futures_create_order(
+                symbol= symbol,
+                side= side,
+                type= ORDER_TYPE_MARKET,
+                quantity=quantity
+            )
+            logging.info(f"Market Order placed: {order}")
+            print("Market order placed successfully!")
+            return order
+        except Exception as e:
+            logging.error(f"Market Order Error: {e}")
+            print(f"Error placing market order: {e}")
+            return None
+
+    def place_limit_order(self, symbol, side, quantity, price):
+        try:
+            order = self.client.futures_create_order(
+                symbol= symbol,
+                side= side,
+                type= ORDER_TYPE_LIMIT,
+                timeInForce= TIME_IN_FORCE_GTC,
+                quantity= quantity,
+                price= price
+            )
+            logging.info(f"Limit Order placed: {order}")
+            print("Limit order placed successfully!")
+            return order
+        except Exception as e:
+            logging.error(f"Limit Order Error: {e}")
+            print(f"Error placing limit order: {e}")
+            return None
+
+
+# CLI Interface
+def main():
+    api_key = input("Enter API Key: ").strip()
+    api_secret = input("Enter API Secret: ").strip()
+    bot = BasicBot(api_key, api_secret)
+
+    while True:
+        print("\n Simplified Trading Bot ")
+        print("1. Place Market Order")
+        print("2. Place Limit Order")
+        print("3. Exit")
+
+        choice = input("Select option: ").strip()
+
+        if choice == "1":
+            symbol = input("Enter trading pair (e.g., BTCUSDT): ").upper()
+            side = input("Enter side (BUY/SELL): ").upper()
+            quantity = float(input("Enter quantity: "))
+
+            if side not in ["BUY", "SELL"]:
+                print("Invalid side. Please enter BUY or SELL.")
+                continue
+
+            bot.place_market_order(symbol, side, quantity)
+
+        elif choice == "2":
+            symbol = input("Enter trading pair (e.g., BTCUSDT): ").upper()
+            side = input("Enter side (BUY/SELL): ").upper()
+            quantity = float(input("Enter quantity: "))
+            price = float(input("Enter limit price: "))
+
+            if side not in ["BUY", "SELL"]:
+                print("Invalid side. Please enter BUY or SELL.")
+                continue
+
+            bot.place_limit_order(symbol, side, quantity, price)
+
+        elif choice == "3":
+            logging.info("Bot exited by user.")
+            print("Exiting bot. Goodbye!")
+            sys.exit()
+
+        else:
+            print("Invalid option. Please choose 1, 2, or 3.")
+
+
+if __name__ == "__main__":
+    try:
+        main()
+    except KeyboardInterrupt:
+        logging.warning("Bot stopped with KeyboardInterrupt (Ctrl+C).")
+        print("\nExiting bot due to keyboard interrupt.")
+        sys.exit()
+
